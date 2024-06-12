@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1063113737205",
+    "project_id": "bike-rent-mobile-cf38d",
+    "storage_bucket": "bike-rent-mobile-cf38d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063113737205:android:00f3701312d64b147756bc",
+        "android_client_info": {
+          "package_name": "com.nimbus.bike_rent_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLyY0spNWAgkIzg0Dfiz8UPxQoVJr9UVo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
