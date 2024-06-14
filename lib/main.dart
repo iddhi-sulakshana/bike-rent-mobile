@@ -1,5 +1,5 @@
 import 'package:bike_rent_mobile/firebase_options.dart';
-import 'package:bike_rent_mobile/splash_screen.dart';
+import 'package:bike_rent_mobile/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 

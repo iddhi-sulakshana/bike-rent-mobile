@@ -1,4 +1,4 @@
-import 'package:bike_rent_mobile/login.dart';
+import 'package:bike_rent_mobile/screens/login.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:lottie/lottie.dart';
