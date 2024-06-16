@@ -1,9 +1,14 @@
 // ignore_for_file: avoid_print
 
+import 'package:bike_rent_mobile/features/user_auth/firebase_auth_service.dart';
+import 'package:bike_rent_mobile/screens/home.dart';
 import 'package:bike_rent_mobile/screens/signup.dart';
 import 'package:bike_rent_mobile/utilities/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +19,17 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Widget _buildEmailTF() {
     return Column(
@@ -29,13 +44,14 @@ class _LoginPageState extends State<LoginPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -64,13 +80,14 @@ class _LoginPageState extends State<LoginPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _passwordController,
             obscureText: true,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -132,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
       width: double.infinity,
       child: ElevatedButton(
         // elevation: 5.0,
-        onPressed: () => print('Login Button Pressed'),
+        onPressed: _login,
         // padding: const EdgeInsets.all(15.0),
         // shape: RoundedRectangleBorder(
         //   borderRadius: BorderRadius.circular(30.0),
@@ -319,5 +336,41 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _login() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+    try {
+      User? user = await _firebaseAuthService.signInWithEmailAndPassword(
+        email,
+        password,
+      );
+      if (user != null) {
+        print('User logged in successfully');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid email or password'),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      print('Failed with error code: ${e.code}');
+      print('Error message: ${e.message}');
+      // error snackbar shows in red
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
   }
 }

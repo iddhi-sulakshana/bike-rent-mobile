@@ -1,9 +1,12 @@
 // ignore_for_file: avoid_print
 
+import 'package:bike_rent_mobile/features/user_auth/firebase_auth_service.dart';
 import 'package:bike_rent_mobile/screens/login.dart';
 import 'package:bike_rent_mobile/utilities/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -14,6 +17,22 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
+
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   Widget _buildNameTF() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,13 +46,14 @@ class _SignupPageState extends State<SignupPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _nameController,
             keyboardType: TextInputType.name,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -62,13 +82,14 @@ class _SignupPageState extends State<SignupPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _phoneController,
             keyboardType: TextInputType.phone,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -97,13 +118,14 @@ class _SignupPageState extends State<SignupPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -132,13 +154,14 @@ class _SignupPageState extends State<SignupPage> {
           alignment: Alignment.centerLeft,
           decoration: kBoxDecorationStyle,
           height: 60.0,
-          child: const TextField(
+          child: TextField(
+            controller: _passwordController,
             obscureText: true,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontFamily: 'OpenSans',
             ),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.only(top: 14.0),
               prefixIcon: Icon(
@@ -160,7 +183,7 @@ class _SignupPageState extends State<SignupPage> {
       width: double.infinity,
       child: ElevatedButton(
         // elevation: 5.0,
-        onPressed: () => print('Signup Button Pressed'),
+        onPressed: _signup,
         // padding: const EdgeInsets.all(15.0),
         // shape: RoundedRectangleBorder(
         //   borderRadius: BorderRadius.circular(30.0),
@@ -352,5 +375,47 @@ class _SignupPageState extends State<SignupPage> {
         ),
       ),
     );
+  }
+
+  void _signup() async {
+    print('Signup Button Pressed');
+    String name = _nameController.text;
+    String email = _emailController.text;
+    String phone = _phoneController.text;
+    String password = _passwordController.text;
+
+    try {
+      User? user = await _firebaseAuthService.signUpWithEmailAndPassword(
+        email,
+        password,
+      );
+      if (user != null) {
+        print('User Signed Up');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        print('User not Signed Up');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "User not Signed Up! Try Again.",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+    }
   }
 }
