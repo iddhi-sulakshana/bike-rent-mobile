@@ -1,20 +1,32 @@
 import 'package:bike_rent_mobile/screens/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Sign up with email and password
   Future<User?> signUpWithEmailAndPassword(
-      String email, String password) async {
+      String email, String password, String name, String phone) async {
     try {
       final UserCredential userCredential =
           await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return userCredential.user;
+      User? user = userCredential.user;
+      if (user != null) {
+        // Save additional user information to Firestore
+        await _firestore.collection('users').doc(user.uid).set({
+          'name': name,
+          'email': email,
+          'phone': phone,
+          'created_at': FieldValue.serverTimestamp(),
+        });
+      }
+      return user;
     } on FirebaseAuthException catch (e) {
       throw FirebaseAuthException(code: e.code, message: e.message);
     }
@@ -38,7 +50,6 @@ class FirebaseAuthService {
   // signout user
   Future<void> signOut(BuildContext context) async {
     await _firebaseAuth.signOut();
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    Navigator.pushNamed(context, '/login');
   }
 }

@@ -1,14 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:bike_rent_mobile/features/user_auth/firebase_auth_service.dart';
-import 'package:bike_rent_mobile/screens/home.dart';
-import 'package:bike_rent_mobile/screens/signup.dart';
 import 'package:bike_rent_mobile/utilities/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -238,12 +234,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSignupBtn() {
     return GestureDetector(
       // on tap redirect to the signup page
-      onTap: () => {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const SignupPage()),
-        ),
-      },
+      onTap: () => {Navigator.pushNamed(context, '/signup')},
       child: RichText(
         text: const TextSpan(
           children: [
@@ -348,10 +339,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (user != null) {
         print('User logged in successfully');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
+        Navigator.pushNamed(context, '/home');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

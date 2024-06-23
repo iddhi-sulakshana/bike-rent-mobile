@@ -272,9 +272,9 @@ class _SignupPageState extends State<SignupPage> {
   Widget _buildSigninBtn() {
     return GestureDetector(
       onTap: () => {
-        Navigator.push(
+        Navigator.pushNamed(
           context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
+          '/login',
         ),
       },
       child: RichText(
@@ -386,15 +386,10 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       User? user = await _firebaseAuthService.signUpWithEmailAndPassword(
-        email,
-        password,
-      );
+          email, password, name, phone);
       if (user != null) {
         print('User Signed Up');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        Navigator.pushNamed(context, '/login');
       } else {
         print('User not Signed Up');
         ScaffoldMessenger.of(context).showSnackBar(
