@@ -18,6 +18,8 @@ dependencies:
     firebase_auth: ^5.1.0
     cloud_firestore: ^5.0.1
     rounded_loading_button_plus: ^3.0.1
+    google_nav_bar: ^5.0.6
+    line_icons: ^2.0.0
 
 dev_dependencies:
     flutter_test:
