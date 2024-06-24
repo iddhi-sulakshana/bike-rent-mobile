@@ -1,4 +1,4 @@
-import 'package:bike_rent_mobile/screens/home.dart';
+import 'package:bike_rent_mobile/screens/home_nav.dart';
 import 'package:bike_rent_mobile/screens/login.dart';
 import 'package:bike_rent_mobile/screens/signup.dart';
 import 'package:bike_rent_mobile/screens/splash_screen.dart';
@@ -47,7 +47,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: const SplashScreen(),
       routes: {
         '/splash': (context) => const SplashScreen(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const HomeNavigationPage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
       },
