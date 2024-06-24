@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class LikesPage extends StatefulWidget {
@@ -8,10 +9,19 @@ class LikesPage extends StatefulWidget {
 }
 
 class _LikesPageState extends State<LikesPage> {
+  final currentUser = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Likes Page'),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: ListView(
+        children: const [
+          SizedBox(
+            height: 30,
+          ),
+          Icon(Icons.person, size: 100),
+        ],
+      ),
     );
   }
 }
