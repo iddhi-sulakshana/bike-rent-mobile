@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -144,23 +145,29 @@ class _LoginPageState extends State<LoginPage> {
       padding: const EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
       child: ElevatedButton(
-        // elevation: 5.0,
-        onPressed: _login,
-        // padding: const EdgeInsets.all(15.0),
-        // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(30.0),
-        // ),
-        // color: Colors.white,
-        child: const Text(
-          'LOGIN',
-          style: TextStyle(
-            color: Color(0xFF527DAA),
-            letterSpacing: 1.5,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'OpenSans',
-          ),
-        ),
+        onPressed:
+            _isLoading ? null : _loginAction, // Disable button when loading
+        child: _isLoading
+            ? const Text(
+                'LOGINING...',
+                style: TextStyle(
+                  color: Color(0xFF527DAA),
+                  letterSpacing: 1.5,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+              )
+            : const Text(
+                'LOGIN',
+                style: TextStyle(
+                  color: Color(0xFF527DAA),
+                  letterSpacing: 1.5,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+              ),
       ),
     );
   }
@@ -234,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildSignupBtn() {
     return GestureDetector(
       // on tap redirect to the signup page
-      onTap: () => {Navigator.pushNamed(context, '/signup')},
+      onTap: () => {print("signup"), Navigator.pushNamed(context, '/signup')},
       child: RichText(
         text: const TextSpan(
           children: [
@@ -329,9 +336,30 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _login() async {
+  void _loginAction() async {
+    setState(() {
+      _isLoading = true;
+    });
     final String email = _emailController.text;
     final String password = _passwordController.text;
+
+    // validate email and password
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please enter email and password',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     try {
       User? user = await _firebaseAuthService.signInWithEmailAndPassword(
         email,
@@ -339,26 +367,40 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (user != null) {
         print('User logged in successfully');
-        Navigator.pushNamed(context, '/home');
+        if (mounted) {
+          Navigator.pushNamed(context, '/home');
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid email or password'),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Invalid email or password',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
       print('Failed with error code: ${e.code}');
       print('Error message: ${e.message}');
       // error snackbar shows in red
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.message!,
-            style: const TextStyle(color: Colors.red),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message!,
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
           ),
-        ),
-      );
+        );
+      }
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:bike_rent_mobile/screens/home.dart';
 import 'package:bike_rent_mobile/screens/login.dart';
+import 'package:bike_rent_mobile/screens/signup.dart';
 import 'package:bike_rent_mobile/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
         '/splash': (context) => const SplashScreen(),
         '/home': (context) => const HomePage(),
         '/login': (context) => const LoginPage(),
-        '/register': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
       },
     );
   }

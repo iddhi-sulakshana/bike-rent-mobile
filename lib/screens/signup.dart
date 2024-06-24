@@ -1,12 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:bike_rent_mobile/features/user_auth/firebase_auth_service.dart';
-import 'package:bike_rent_mobile/screens/login.dart';
 import 'package:bike_rent_mobile/utilities/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -19,10 +17,12 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -182,23 +182,28 @@ class _SignupPageState extends State<SignupPage> {
       padding: const EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
       child: ElevatedButton(
-        // elevation: 5.0,
-        onPressed: _signup,
-        // padding: const EdgeInsets.all(15.0),
-        // shape: RoundedRectangleBorder(
-        //   borderRadius: BorderRadius.circular(30.0),
-        // ),
-        // color: Colors.white,
-        child: const Text(
-          'SIGNUP',
-          style: TextStyle(
-            color: Color(0xFF527DAA),
-            letterSpacing: 1.5,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'OpenSans',
-          ),
-        ),
+        onPressed: _isLoading ? null : _signupAction,
+        child: _isLoading
+            ? const Text(
+                'SIGNING UP...',
+                style: TextStyle(
+                  color: Color(0xFF527DAA),
+                  letterSpacing: 1.5,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+              )
+            : const Text(
+                'SIGN UP',
+                style: TextStyle(
+                  color: Color(0xFF527DAA),
+                  letterSpacing: 1.5,
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'OpenSans',
+                ),
+              ),
       ),
     );
   }
@@ -377,40 +382,83 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  void _signup() async {
+  void _signupAction() async {
+    setState(() {
+      _isLoading = true;
+    });
+    BuildContext context = this.context;
     print('Signup Button Pressed');
     String name = _nameController.text;
     String email = _emailController.text;
     String phone = _phoneController.text;
     String password = _passwordController.text;
 
-    try {
-      User? user = await _firebaseAuthService.signUpWithEmailAndPassword(
-          email, password, name, phone);
-      if (user != null) {
-        print('User Signed Up');
-        Navigator.pushNamed(context, '/login');
-      } else {
-        print('User not Signed Up');
+    // Validate the input
+    if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              "User not Signed Up! Try Again.",
-              style: TextStyle(color: Colors.red),
+              "Please fill all the fields!",
+              style: TextStyle(color: Colors.white),
             ),
+            backgroundColor: Colors.red,
           ),
         );
       }
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      User? user = await _firebaseAuthService.signUpWithEmailAndPassword(
+          email, password, name, phone);
+      print('User Signed Up');
+      if (user != null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "User Signed Up!",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pushNamed(context, '/login');
+        }
+      } else {
+        print('User not Signed Up');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                "User not Signed Up! Try Again.",
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     } on FirebaseAuthException catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            e.message!,
-            style: const TextStyle(color: Colors.red),
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message!,
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
           ),
-        ),
-      );
+        );
+      }
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 }

@@ -1,4 +1,3 @@
-import 'package:bike_rent_mobile/screens/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +49,8 @@ class FirebaseAuthService {
   // signout user
   Future<void> signOut(BuildContext context) async {
     await _firebaseAuth.signOut();
-    Navigator.pushNamed(context, '/login');
+    if (context.mounted) {
+      Navigator.pushNamed(context, '/login');
+    }
   }
 }
