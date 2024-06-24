@@ -5,6 +5,7 @@ import 'package:bike_rent_mobile/utilities/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,8 +19,9 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   bool _rememberMe = false;
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -144,30 +146,20 @@ class _LoginPageState extends State<LoginPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed:
-            _isLoading ? null : _loginAction, // Disable button when loading
-        child: _isLoading
-            ? const Text(
-                'LOGINING...',
-                style: TextStyle(
-                  color: Color(0xFF527DAA),
-                  letterSpacing: 1.5,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'OpenSans',
-                ),
-              )
-            : const Text(
-                'LOGIN',
-                style: TextStyle(
-                  color: Color(0xFF527DAA),
-                  letterSpacing: 1.5,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'OpenSans',
-                ),
-              ),
+      child: RoundedLoadingButton(
+        controller: _btnController,
+        onPressed: _loginAction,
+        color: Colors.white,
+        child: const Text(
+          'LOGIN',
+          style: TextStyle(
+            color: Color(0xFF527DAA),
+            letterSpacing: 1.5,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSans',
+          ),
+        ),
       ),
     );
   }
@@ -337,9 +329,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _loginAction() async {
-    setState(() {
-      _isLoading = true;
-    });
+    _btnController.start();
     final String email = _emailController.text;
     final String password = _passwordController.text;
 
@@ -354,9 +344,9 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.red,
         ),
       );
-      setState(() {
-        _isLoading = false;
-      });
+      _btnController.error();
+      await Future.delayed(const Duration(seconds: 1));
+      _btnController.reset();
       return;
     }
 
@@ -367,6 +357,8 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (user != null) {
         print('User logged in successfully');
+        _btnController.success();
+        await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
           Navigator.pushNamed(context, '/home');
         }
@@ -382,6 +374,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
           );
         }
+        _btnController.error();
+        await Future.delayed(const Duration(seconds: 1));
+        _btnController.reset();
       }
     } on FirebaseAuthException catch (e) {
       print('Failed with error code: ${e.code}');
@@ -392,15 +387,15 @@ class _LoginPageState extends State<LoginPage> {
           SnackBar(
             content: Text(
               e.message!,
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: Colors.red,
           ),
         );
       }
+      _btnController.error();
+      await Future.delayed(const Duration(seconds: 1));
+      _btnController.reset();
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 }

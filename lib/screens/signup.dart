@@ -5,6 +5,7 @@ import 'package:bike_rent_mobile/utilities/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -22,8 +23,8 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isLoading = false;
-
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   @override
   void dispose() {
     _nameController.dispose();
@@ -181,29 +182,20 @@ class _SignupPageState extends State<SignupPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 25.0),
       width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _signupAction,
-        child: _isLoading
-            ? const Text(
-                'SIGNING UP...',
-                style: TextStyle(
-                  color: Color(0xFF527DAA),
-                  letterSpacing: 1.5,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'OpenSans',
-                ),
-              )
-            : const Text(
-                'SIGN UP',
-                style: TextStyle(
-                  color: Color(0xFF527DAA),
-                  letterSpacing: 1.5,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'OpenSans',
-                ),
-              ),
+      child: RoundedLoadingButton(
+        controller: _btnController,
+        onPressed: _signupAction,
+        color: Colors.white,
+        child: const Text(
+          'SIGN UP',
+          style: TextStyle(
+            color: Color(0xFF527DAA),
+            letterSpacing: 1.5,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'OpenSans',
+          ),
+        ),
       ),
     );
   }
@@ -383,9 +375,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _signupAction() async {
-    setState(() {
-      _isLoading = true;
-    });
+    _btnController.start();
     BuildContext context = this.context;
     print('Signup Button Pressed');
     String name = _nameController.text;
@@ -406,9 +396,9 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
       }
-      setState(() {
-        _isLoading = false;
-      });
+      _btnController.error();
+      await Future.delayed(const Duration(seconds: 1));
+      _btnController.reset();
       return;
     }
 
@@ -427,6 +417,8 @@ class _SignupPageState extends State<SignupPage> {
               backgroundColor: Colors.green,
             ),
           );
+          _btnController.success();
+          await Future.delayed(const Duration(seconds: 1));
           Navigator.pushNamed(context, '/login');
         }
       } else {
@@ -442,6 +434,9 @@ class _SignupPageState extends State<SignupPage> {
             ),
           );
         }
+        _btnController.error();
+        await Future.delayed(const Duration(seconds: 1));
+        _btnController.reset();
       }
     } on FirebaseAuthException catch (e) {
       print('Error: $e');
@@ -456,9 +451,9 @@ class _SignupPageState extends State<SignupPage> {
           ),
         );
       }
+      _btnController.error();
+      await Future.delayed(const Duration(seconds: 1));
+      _btnController.reset();
     }
-    setState(() {
-      _isLoading = false;
-    });
   }
 }
